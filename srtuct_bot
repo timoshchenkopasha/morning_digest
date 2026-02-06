@@ -1,0 +1,44 @@
+MorningDigest_bot/
+│
+├── .venv/                    # ✅ Виртуальное окружение (есть)
+├── .env                      # Секретные токены
+├── .gitignore                # Игнор .venv, .env
+├── requirements.txt          # pip freeze
+│
+├── main.py                   # ✅ Точка входа (есть)
+├── config.py                 # ✅ Конфигурация (есть)
+│
+├── database/                 # База данных
+│   ├── __init__.py
+│   ├── db.py              # Создание таблиц, CRUD
+│   ├── models.py          # User: id, user_id, subscribed, timezone
+│   └── users.py           # add_user(), get_subscribers()
+│
+├── handlers/                 # Обработчики команд
+│   ├── __init__.py
+│   ├── start.py          # /start, /help
+│   ├── subscribe.py      # /subscribe, /unsubscribe
+│   └── settings.py       # Настройки рассылки
+│
+├── keyboards/                # Кнопки
+│   ├── __init__.py
+│   ├── main_menu.py      # Главное меню
+│   └── inline.py         # Inline кнопки "Подробнее"
+│
+├── parsers/                  # Парсеры новостей
+│   ├── __init__.py
+│   ├── habr.py          # Хабр
+│   ├── vc.ru            # VC.ru
+│   ├── rbc.py           # РБК
+│   └── formatters.py    # Форматирование новости
+│
+├── scheduler/                # Расписание
+│   ├── __init__.py
+│   └── digest.py        # 7:00, 12:00, 20:00 рассылка
+│
+├── utils/                    # Утилиты
+│   ├── __init__.py
+│   ├── logger.py        # Логирование
+│   └── helpers.py       # Вспомогательные функции
+│
+└── data/                     # Данные
