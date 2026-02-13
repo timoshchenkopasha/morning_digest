@@ -1,0 +1,1 @@
+from .mailing_digest import *

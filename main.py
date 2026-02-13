@@ -1,15 +1,22 @@
+"""MorningDigest Bot — Утренний дайджест новостей"""
+
 from config import bot
-import asyncio
-from database import *
+from database.db import *
 import handlers
 from utils import *
+from parsers import *
 
 
 if __name__ == "__main__":
-    set_bot_commands(bot)
-    asyncio.run(init_db())
     print("🤖 MorningDigest бот запущен!")
-    bot.polling()
+    init_db()
+    set_bot_commands(bot)
+    scheduler = start_scheduler()
+    bot.infinity_polling(none_stop=True, interval=1, timeout=20)
+
+
+
+
 
 
 

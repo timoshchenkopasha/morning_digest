@@ -11,10 +11,8 @@ else:
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
 MENU_COMMANDS = (
-    ('start', "Запустить бота"),
-    ('subscribe', "Подписаться"),
-    ('unsubscribe', "Отписаться"),
-    ('status', "Проверить подписку")
+    ('start', 'Запустить бота'),
+    ('digest', 'Получить актуальные новости')
 )
 
 
