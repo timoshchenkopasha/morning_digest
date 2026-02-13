@@ -70,8 +70,8 @@ def start_scheduler():
     scheduler.add_job(
         send_daily_digest,
         'cron',
-        hour=17,
-        minute=52, #для проверки
+        hour=18,
+        minute=30, #для проверки
         id='daily_digest',
         replace_existing=True
     )
