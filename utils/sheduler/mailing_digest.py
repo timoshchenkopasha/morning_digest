@@ -12,7 +12,6 @@ def get_subscribers() -> List:
 
     try:
         users = Users.select()
-        print(users)
         return [(user.user_id, user.user_name or 'User') for user in users]
     except Exception as e:
         print(f'Ошибка в при возврате подписчиков в get_subscribers(): {e}')
@@ -58,7 +57,7 @@ def send_daily_digest():
             set_user_progress(user_id, user_name, 1)
             bot.send_message(user_id, "<b>➕ Остальные новости:</b> /digest", parse_mode='HTML')
 
-            print(f"✅ Рассылка {user_name} ({user_id})")
+            print(f"✅ Рассылка: {user_name} ({user_id})")
             time.sleep(0.1)
         except Exception as e:
             print(f"❌ Ошибка рассылки {user_id}: {e}")
@@ -70,8 +69,8 @@ def start_scheduler():
     scheduler.add_job(
         send_daily_digest,
         'cron',
-        hour=18,
-        minute=30, #для проверки
+        hour=15,
+        minute=5, #для проверки
         id='daily_digest',
         replace_existing=True
     )

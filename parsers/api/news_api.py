@@ -35,8 +35,8 @@ def news_api(top_n: int = 5, country: str = 'ru') -> List[Dict]:
             return []
 
         # для отладки
-        with open('news_json.json', 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+        # with open('news_json.json', 'w', encoding='utf-8') as f:
+        #     json.dump(data, f, ensure_ascii=False, indent=4)
 
         news = []
         for article in data.get('results', [])[:top_n]:

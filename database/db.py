@@ -85,7 +85,7 @@ def set_user_progress(user_id: int, user_name, last_pack: int):
             progress.updated_at = datetime.now()
             progress.save()
 
-        print(f"✅ [{last_pack}] {user_name} ({user_id})")
+        print(f"Прогресс пользователя: ✅ [{last_pack}] {user_name} ({user_id})") #для отладки
     except Exception as error:
         print(f'❌ Ошибка сохранения прогресса пользователя {user_id}: {error}')
 
