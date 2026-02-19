@@ -1,9 +1,11 @@
 import os
 from typing import List, Dict
+
+import json
 import requests
 from dotenv import load_dotenv
 import logging
-import json
+
 
 
 load_dotenv()

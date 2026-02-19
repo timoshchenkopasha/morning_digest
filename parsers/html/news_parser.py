@@ -1,10 +1,11 @@
+from typing import List, Dict
+
 import requests
 import logging
-from typing import List, Dict
 from bs4 import BeautifulSoup
 
-#TODO оставил для примера
 
+#TODO оставил для примера
 
 logger = logging.getLogger(__name__)
 

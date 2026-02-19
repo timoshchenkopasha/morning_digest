@@ -1,1 +1,1 @@
-from .news_handler import *
+from .digest_handler import *
