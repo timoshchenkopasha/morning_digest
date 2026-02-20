@@ -34,12 +34,13 @@ def digest_handler(message: types.Message) -> None:
 <i>💥 Новости обещают быть интересными! 🌅</i>""",
             parse_mode='HTML'
         )
+        return
 
     if user_id in recent_users:
         bot.send_message(message.chat.id,
                          "⚡ <b>СУПЕРСКОРОСТЬ!</b> ⏳ Подожди 3 сек...",
                          parse_mode='HTML')
-        return None
+        return
     recent_users.add(user_id)
 
     next_pack = user_progress.last_pack + 1
@@ -82,6 +83,13 @@ def digest_handler(message: types.Message) -> None:
 
     # ОБНОВЛЯЕМ СЕРИЮ
     streak_grew = update_streak(user_id)
+
+    user_progress = (UsersNewsProgress
+                     .select()
+                     .join(Users)
+                     .where((Users.user_id == user_id) & (UsersNewsProgress.day == today))
+                     .first()
+                     )
 
     # ПРОВЕРЯЕМ УРОВЕНЬ
     new_level, level_name = calculate_daily_level(user_progress.last_pack)

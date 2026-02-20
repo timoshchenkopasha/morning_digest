@@ -201,7 +201,7 @@ def update_streak(user_id: int) -> bool:
     user_progress.updated_at = datetime.now()
     user_progress.save()
 
-    return user_progress.streak_current > 0
+    return True
 
 def get_user_level(packs_viewed: int) -> tuple:
     """Возвращает (уровень, название, сообщение)"""
