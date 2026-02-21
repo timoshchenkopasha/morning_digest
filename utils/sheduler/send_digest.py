@@ -1,5 +1,7 @@
 import time
-from datetime import datetime
+
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 from database.db import *
 from handlers.custom_handlers import *
@@ -72,21 +74,26 @@ def send_daily_digest_and_weather():
         print("❌ БД ПУСТАЯ! Напиши /digest")
         return
 
-    for user_id, user_city, user_name in subscribers:
-        weather_info = get_daily_forecast(user_city)
-        if weather_info:
-            caption = format_weather_message(weather_info)
-            bot.send_message(user_id, caption, parse_mode='HTML')
-        else:
-            bot.send_message(user_id,
-                           "🌤️ <b>ПОГОДА НЕ ВАЖНА</b>\n☀️ Главное — твое настроение. Хорошего дня ❤️",
-                           parse_mode='HTML')
+    def send_to_user(user_data):
+        """БЕЗОПАСНАЯ рассылка ОДНОМУ пользователю"""
 
-        bot.send_message(user_id,
-                        "⚔️ <b>УТРЕННЯЯ АТАКА НОВОСТЕЙ!</b>\n🔥 <b>ПЕРВАЯ ПАЧКА ДНЯ</b>",
-                        parse_mode='HTML')
+        user_id, user_city, user_name = user_data
 
         try:
+            weather_info = get_daily_forecast(user_city)
+            if weather_info:
+                caption = format_weather_message(weather_info)
+                bot.send_message(user_id, caption, parse_mode='HTML')
+            else:
+                bot.send_message(user_id,
+                               "🌤️ <b>ПОГОДА НЕ ВАЖНА</b>\n☀️ Главное — твое настроение. Хорошего дня ❤️",
+                               parse_mode='HTML')
+
+            bot.send_message(user_id,
+                            "⚔️ <b>УТРЕННЯЯ АТАКА НОВОСТЕЙ!</b>\n🔥 <b>ПЕРВАЯ ПАЧКА ДНЯ</b>",
+                            parse_mode='HTML')
+            time.sleep(0.05)
+
             for i, news in enumerate(news_pack_1, 1):
                 title = news['title'][:100]
                 caption = f'{i}. <b>{title}</b>\n\n🔗 {news["url"]}'
@@ -106,10 +113,15 @@ def send_daily_digest_and_weather():
 
             set_user_progress(user_id, user_name, 1)
             bot.send_message(user_id,
-                           "🎉 <b>ПЕРВАЯ ПАЧКА ЗАГРУЖЕНА!</b>\n"
+                           "🎉 <b>ЭТО БЫЛА ПЕРВАЯ ПАЧКА!</b>\n"
                            "📦 <b>/digest</b> → вторая пачка!\n"
                            "📊 <b>/profile</b> → твой прогресс!",
                            parse_mode='HTML')
-            time.sleep(0.1)
         except Exception as e:
             print(f"❌ Ошибка рассылки {user_id}: {e}")
+        finally:
+            time.sleep(0.1)
+
+    # 10 параллельных потоков рассылки
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        executor.map(send_to_user, subscribers)
