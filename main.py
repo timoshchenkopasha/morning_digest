@@ -32,3 +32,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# git add .
+# git commit -m "fix: config.py + stable scheduler"
+# git push origin main
+
