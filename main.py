@@ -40,3 +40,11 @@ if __name__ == "__main__":
         if scheduler:
             scheduler.shutdown()
             print("✅ Бот остановлен корректно!")
+
+
+
+
+
+# git add .
+# git commit -m "fix: баг с погодой"
+# git push
