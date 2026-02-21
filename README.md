@@ -61,3 +61,4 @@ send_news_digest() - обработка команды - /digest (отправк
 3. пакет scheduler с файлом mailing_digest.py с функциями для рассылки новостей всем подписчикам бота
 
 
+# morning_digest
