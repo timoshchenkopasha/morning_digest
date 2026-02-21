@@ -1,50 +1,34 @@
 """MorningDigest Bot — Утренний дайджест новостей"""
 
-import signal
-import sys
-
 from config import bot
 from database.db import *
 import handlers
 from utils import *
 from parsers import *
 
-scheduler = None
+def main():
+    try:
+        print("🤖 MorningDigest бот запускается...")
+        print("📱 Готов к работе 24/7!")
 
+        init_db()
+        print("✅ База данных готова")
 
-def signal_handler(sig, frame):
-    print("🛑 Graceful shutdown...")
-    if scheduler:
-        scheduler.shutdown()
-    sys.exit(0)
+        set_bot_commands(bot)
+        print("✅ Команды бота установлены")
 
+        scheduler = start_scheduler()
+        print("🕐 Планировщик запущен: 07:00 рассылка + 00:00 reset!")
+
+        print("🚀 Бот полностью готов!")
+        bot.infinity_polling(none_stop=True, interval=1, timeout=30)
+
+    except KeyboardInterrupt:
+        print("⏹️ Бот остановлен пользователем")
+    except Exception as e:
+        print(f"❌ Ошибка: {e}")
+    finally:
+        print("🛑 Завершение работы...")
 
 if __name__ == "__main__":
-    print("🤖 MorningDigest бот запущен!")
-
-    init_db()
-    set_bot_commands(bot)
-    scheduler = start_scheduler()
-
-    # Регистрируем обработчики СЛЕДУЮЩИМИ
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-
-    try:
-        bot.infinity_polling(none_stop=True, interval=1, timeout=20)
-    except KeyboardInterrupt:
-        print("🛑 KeyboardInterrupt...")
-        if scheduler:
-            scheduler.shutdown()
-    finally:
-        if scheduler:
-            scheduler.shutdown()
-            print("✅ Бот остановлен корректно!")
-
-
-
-
-
-# git add .
-# git commit -m
-# git push
+    main()
