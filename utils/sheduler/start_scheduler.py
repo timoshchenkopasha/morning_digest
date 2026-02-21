@@ -11,8 +11,8 @@ def start_scheduler():
     scheduler.add_job(
         send_daily_digest_and_weather,
         'cron',
-        hour=1,
-        minute=38,
+        hour=7,
+        minute=00,
         id='daily_digest',
         replace_existing=True
     )
