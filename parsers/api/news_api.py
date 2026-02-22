@@ -23,14 +23,14 @@ def news_api(top_n: int = 5, country: str = 'ru') -> List[Dict]:
     try:
         url = 'https://newsdata.io/api/1/latest'
 
-        params = {
-            'apikey': NEWS_API_KEY,
-            'country': country,  # ru, ua, by, kz
-            'language': 'ru',
-            'size': top_n,
-            'removeduplicate': 1
-        }
-        response = requests.get(url, params=params, timeout=10)
+        # params = {
+        #     'apikey': NEWS_API_KEY,
+        #     'country': country,  # ru, ua, by, kz
+        #     'language': 'ru',
+        #     'size': top_n,
+        #     'removeduplicate': 1
+        # }
+        response = requests.get(NEWS_API_KEY, timeout=10)
         data = response.json()                  # 'преобразовать JSON строку в Python словарь (десериализация)'
 
         if data['status'] != 'success':
