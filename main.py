@@ -6,7 +6,7 @@ import handlers
 from utils import *
 from parsers import *
 
-def main():
+if __name__ == "__main__":
     try:
         print("🤖 MorningDigest бот запускается...")
         print("📱 Готов к работе 24/7!")
@@ -21,7 +21,10 @@ def main():
         print("🕐 Планировщик запущен: 07:00 рассылка + 00:00 reset!")
 
         print("🚀 Бот полностью готов!")
-        bot.infinity_polling(none_stop=True, interval=1, timeout=30)
+        bot.infinity_polling(
+            timeout=30,
+            long_polling_timeout=20
+        )
 
     except KeyboardInterrupt:
         print("⏹️ Бот остановлен пользователем")
@@ -30,11 +33,8 @@ def main():
     finally:
         print("🛑 Завершение работы...")
 
-if __name__ == "__main__":
-    main()
-
 
 # git add .
-# git commit -m "fix: config.py + stable scheduler"
+# git commit -m "fix: news_api, digest_handler"
 # git push origin main
 
