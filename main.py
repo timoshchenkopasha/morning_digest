@@ -1,4 +1,4 @@
-"""MorningDigest Bot — Утренний дайджест новостей"""
+"""MorningDigest Bot — Утренний дайджест новостей !"""
 
 from config import bot
 from database.db import *
