@@ -171,6 +171,7 @@ def calculate_daily_level(packs_today: int) -> tuple:
 
 def update_streak(user_id: int) -> bool:
     """Возвращает True если серия растет"""
+
     today_date = date.today()
     today_str = today_date.strftime('%Y-%m-%d')
 

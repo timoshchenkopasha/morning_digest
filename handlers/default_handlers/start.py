@@ -1,10 +1,16 @@
 from telebot.types import Message
 
+import logging
+
 from config import bot
 from database import *
 from keyboards import *
 from parsers.api import validate_city
 
+
+# Настройка логгера
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 @bot.message_handler(commands=['start'])
 def start_handler(message):
@@ -28,23 +34,28 @@ def start_handler(message):
             parse_mode='HTML'
         )
         return
-
-    bot.send_message(
-        message.chat.id,
-        """🌅 <b>🚀 WELCOME TO Утренний Дайджест! ⚔️</b>
-
-💥 <b>ЭТО ТВОЙ НОВЫЙ УТРЕННИЙ РИТУАЛ!</b>
-☕ Кофе + новости + погода = <b>ПРОДУКТИВНЫЙ ДЕНЬ</b>
-
-🎯 <b>ТЫ СТАНЕШЬ:</b>
-📈 <b>Читателем → Активным → ПРОФИ ДНЯ!</b>
-🔥 <b>Собери СЕРИЮ дней подряд!</b>
-
-👇 <b>Выбери свой город !</b>
-<i>или нажми 'Другой город'</i>""",
-        parse_mode='HTML',
-        reply_markup=city_keyboard_func()
-    )
+    else:
+        bot.send_message(
+            message.chat.id,
+            """🌅 <b>🚀 WELCOME TO Утренний Дайджест! ⚔️</b>
+    
+    💥 <b>ЭТО ТВОЙ НОВЫЙ УТРЕННИЙ РИТУАЛ!</b>
+    ☕ Кофе + новости + погода = <b>ПРОДУКТИВНЫЙ ДЕНЬ</b>
+    
+    🎯 <b>ТЫ СТАНЕШЬ:</b>
+    📈 <b>Читателем → Активным → ПРОФИ ДНЯ!</b>
+    🔥 <b>Собери СЕРИЮ дней подряд!</b>
+    
+    👇 <b>Выбери свой город !</b>
+    <i>или нажми 'Другой город'</i>""",
+            parse_mode='HTML',
+            reply_markup=city_keyboard_func()
+        )
+        user_id = message.from_user.id
+        user_name = message.from_user.username or "User"
+        logger.info(f"👤 Новый пользователь {user_id}")
+        set_user_progress(user_id, user_name, 0)
+        return
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_city_selection(call):
