@@ -1,1 +1,0 @@
-ls -la | grep -E "(Procfile|runtime.txt)"python-3.12.7
