@@ -1,4 +1,3 @@
-import telebot
 from telebot.types import Message
 
 from config import bot
@@ -13,7 +12,7 @@ def echo_handler(message: Message) -> None:
     greetings = ['привет', 'здравствуй', 'добрый день', 'доброе утро',
                  'добрый вечер', 'hi', 'hello', 'hey', ' приветствую']
 
-    if any(greeting in text.lower() for greeting in greetings):
+    if any(greeting in text for greeting in greetings):
         bot.reply_to(message,
                      """<b>🚀 MorningDigest — ТВОË НАЧАЛО ДНЯ! ⚡</b>
  

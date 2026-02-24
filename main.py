@@ -1,40 +1,46 @@
 """MorningDigest Bot — Утренний дайджест новостей !"""
 
+import logging
+
 from config import bot
 from database.db import *
 import handlers
 from utils import *
 from parsers import *
 
+
+logger = logging.getLogger(__name__)
+
 if __name__ == "__main__":
     try:
-        print("🤖 MorningDigest бот запускается...")
-        print("📱 Готов к работе 24/7!")
+        logger.info("🤖 MorningDigest бот запускается...")
+        logger.info("📱 Готов к работе 24/7!")
 
         init_db()
-        print("✅ База данных готова")
+        logger.info("✅ База данных готова")
 
         set_bot_commands(bot)
-        print("✅ Команды бота установлены")
+        logger.info("✅ Команды бота установлены")
 
         scheduler = start_scheduler()
-        print("🕐 Планировщик запущен: 07:00 рассылка + 00:00 reset!")
+        logger.info("🕐 Планировщик запущен: 07:00 рассылка + 00:00 reset!")
 
-        print("🚀 Бот полностью готов!")
+        logger.info("🚀 Бот полностью готов!")
         bot.infinity_polling(
             timeout=30,
             long_polling_timeout=20
         )
 
     except KeyboardInterrupt:
-        print("⏹️ Бот остановлен пользователем")
+        logger.info("⏹️ Бот остановлен пользователем")
     except Exception as e:
-        print(f"❌ Ошибка: {e}")
+        logger.error(f"❌ Критическая ошибка бота: {e}", exc_info=True)
     finally:
-        print("🛑 Завершение работы...")
+        logger.info("🛑 Завершение работы...")
+
 
 
 # git add .
-# git commit -m "fix: news_api, digest_handler"
+# git commit -m "fix: all"
 # git push origin main
 

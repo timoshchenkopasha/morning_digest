@@ -1,8 +1,12 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 
+import logging
+
 from . import send_daily_digest_and_weather
 from database.db import reset_daily_progress
 
+
+logger = logging.getLogger(__name__)
 
 def start_scheduler():
     """Создает и запускает планировщик задач"""
@@ -25,5 +29,5 @@ def start_scheduler():
     )
 
     scheduler.start()
-    print("🕐 Планировщик запущен: ЕЖЕДНЕВНО 8:00")
+    logger.info("🕐 Планировщик запущен: 07:00 рассылка + 00:00 сброс")
     return scheduler

@@ -8,54 +8,33 @@ from keyboards import *
 from parsers.api import validate_city
 
 
-# Настройка логгера
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 @bot.message_handler(commands=['start'])
 def start_handler(message):
     """Обработчик команды /start, начало игры с выбором города"""
 
-    user = Users.get_or_none(Users.user_id == message.from_user.id)
+    bot.send_message(
+        message.chat.id,
+        """🌅 <b>🚀 WELCOME TO Утренний Дайджест! ⚔️</b>
 
-    if user and user.city:
-        bot.send_message(
-            message.chat.id,
-            f"""<b>🚀 MorningDigest — ТВОË НАЧАЛО ДНЯ! ⚡</b>
+💥 <b>ЭТО ТВОЙ НОВЫЙ УТРЕННИЙ РИТУАЛ!</b>
+☕ Кофе + новости + погода = <b>ПРОДУКТИВНЫЙ ДЕНЬ</b>
 
-✅ Город <b>{user.city}</b> уже выбран!
+🎯 <b>ТЫ СТАНЕШЬ:</b>
+📈 <b>Читателем → Активным → ПРОФИ ДНЯ!</b>
+🔥 <b>Собери СЕРИЮ дней подряд!</b>
 
-🔥 <b>ТВОИ СУПЕРСИЛЫ:</b>
-• <b>07:00</b> → Погода + новости ☕!
-• <code>/digest</code> → 📰 Следующая пачка СЕЙЧАС  
-• <code>/history</code> → 📊 Твой игровой профиль
-
-<i>💥 Новости обещают быть интересными! 🌅</i>""",
-            parse_mode='HTML'
-        )
-        return
-    else:
-        bot.send_message(
-            message.chat.id,
-            """🌅 <b>🚀 WELCOME TO Утренний Дайджест! ⚔️</b>
-    
-    💥 <b>ЭТО ТВОЙ НОВЫЙ УТРЕННИЙ РИТУАЛ!</b>
-    ☕ Кофе + новости + погода = <b>ПРОДУКТИВНЫЙ ДЕНЬ</b>
-    
-    🎯 <b>ТЫ СТАНЕШЬ:</b>
-    📈 <b>Читателем → Активным → ПРОФИ ДНЯ!</b>
-    🔥 <b>Собери СЕРИЮ дней подряд!</b>
-    
-    👇 <b>Выбери свой город !</b>
-    <i>или нажми 'Другой город'</i>""",
-            parse_mode='HTML',
-            reply_markup=city_keyboard_func()
-        )
-        user_id = message.from_user.id
-        user_name = message.from_user.username or "User"
-        logger.info(f"👤 Новый пользователь {user_id}")
-        set_user_progress(user_id, user_name, 0)
-        return
+👇 <b>Выбери свой город !</b>
+<i>или нажми 'Другой город'</i>""",
+        parse_mode='HTML',
+        reply_markup=city_keyboard_func()
+    )
+    user_id = message.from_user.id
+    user_name = message.from_user.username or "User"
+    logger.info(f"👤 Новый пользователь {user_id}")
+    set_user_progress(user_id, user_name, 0)
+    return
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_city_selection(call):
@@ -131,5 +110,4 @@ def handle_manual_city(message):
             parse_mode='HTML'
         )
         bot.register_next_step_handler(message, handle_manual_city)
-
 

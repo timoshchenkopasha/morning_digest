@@ -4,7 +4,10 @@ from datetime import datetime, date, timedelta
 import json
 from peewee import SqliteDatabase, Model, CharField, IntegerField, DateTimeField, ForeignKeyField, TextField
 from pathlib import Path
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 # АБСОЛЮТНЫЙ ПУТЬ К data/ из корня проекта!
 BASE_DIR = Path(__file__).parent.parent # MorningDigest_bot/
@@ -40,6 +43,7 @@ class UsersNewsProgress(BaseModel):
         on_delete='CASCADE'
     )
     day = CharField(max_length=10)
+    interest = CharField(null=True, default='')
 
     # Дневная система
     last_pack = IntegerField(default=0)         # Пачки за сегодня (и последняя пачка)
@@ -60,6 +64,7 @@ class NewsPacks(BaseModel):
     pack_num = IntegerField()
     news_json = TextField()
     updated_at = DateTimeField(default=datetime.now)
+    interest_hash = CharField(null=True, default='general')
 
 
 def set_user_progress(user_id: int, user_name, last_pack: int):
@@ -81,42 +86,47 @@ def set_user_progress(user_id: int, user_name, last_pack: int):
             progress.updated_at = datetime.now()
             progress.save()
 
-        print(f"Новый пользователь (прогресс/имя/id): ✅ [{progress.last_pack}] {user_name} ({user_id})")
+        logger.info(f"👤 Прогресс [{progress.last_pack}] {user_name} ({user_id})")
     except Exception as error:
-        print(f'❌ Ошибка сохранения прогресса пользователя {user_id}: {error}')
+        logger.error(f'❌ Прогресс {user_id}: {error}')
 
-def save_news_pack(day: str, pack_num: int, news_list: list):
-    """Сохранаяет пачку в бд"""
+
+def save_news_pack(day: str, interest_hash: str, pack_num: int, news_list: list):
+    """Сохраняет пачку с интересами"""
 
     try:
-        NewsPacks.get_or_create(                #метод возвращает объект NewsPacks
+        NewsPacks.get_or_create(
             day=day,
+            interest_hash=interest_hash,
             pack_num=pack_num,
             defaults={'news_json': json.dumps(news_list)}
         )
-        print(f"✅ Сохранена {day} pack_{pack_num}")
+        logger.info(f"📦 Сохранена {day}_{interest_hash}_pack_{pack_num}")
     except Exception as e:
-        print(f"❌ Ошибка сохранения пачки: {e}")
+        logger.error(f"❌ Сохранение пачки {day}_{interest_hash}_{pack_num}: {e}")
 
-def get_news_pack(day: str, pack_num: int):
-    """Получаем пачку из базы данных"""
+def get_news_pack(day: str, interest_hash: str, pack_num: int):
+    """Получает пачку с интересами"""
 
     try:
-        news_pack = NewsPacks.get_or_none(      #метод возвращает объект NewsPacks или None
-            NewsPacks.day==day,
-            NewsPacks.pack_num==pack_num
+        news_pack = NewsPacks.get_or_none(
+            NewsPacks.day == day,
+            NewsPacks.interest_hash == interest_hash,
+            NewsPacks.pack_num == pack_num
         )
         return json.loads(news_pack.news_json) if news_pack else None
     except Exception as e:
-        print(f"❌ Ошибка при получении пачки из базы данных: {e}")
+        logger.error(f"❌ Получение пачки {day}_{interest_hash}_{pack_num}: {e}")
         return None
 
-def pack_exists(day: str, pack_num: int):
-    """Проверка пачки в кэше"""
+def pack_exists(day: str, interest_hash: str, pack_num: int):
+    """Проверка пачки с интересами"""
 
     return NewsPacks.get_or_none(
-        NewsPacks.day==day,
-        NewsPacks.pack_num==pack_num) is not None
+        NewsPacks.day == day,
+        NewsPacks.interest_hash == interest_hash,
+        NewsPacks.pack_num == pack_num
+    ) is not None
 
 def set_user_city(user_id: int, user_name, city_name: str):
     """Сохраняет город у старого или нового пользователя"""
@@ -132,15 +142,56 @@ def set_user_city(user_id: int, user_name, city_name: str):
             }
         )
         if created:
-            print(f"✅ Новый пользователь {user_id} - {city_name}")
+            logger.info(f"👤 Новый {user_id} — {city_name}")
         else:
+            logger.info(f"🏙️ Город {user_id}: {city_name}")
             user.city = city_name
             user.save()
-            print(f"✅ Обновлён город {user_id} → {city_name}")
-
         return True
     except Exception as error:
-        print(f"❌ Ошибка сохранения {user_id}: {error}")
+        logger.error(f"❌ Город {user_id}: {error}")
+
+def get_user_interests(user_id: int) -> str:
+    """Возвращает строку интересов или 'general'"""
+
+    try:
+        today = datetime.now().strftime('%Y-%m-%d')
+        progress = (UsersNewsProgress
+                    .select()
+                    .join(Users)
+                    .where((Users.user_id == user_id) & (UsersNewsProgress.day == today))
+                    .first())
+
+        if progress and progress.interest:
+            return progress.interest
+        return 'general'
+    except Exception as e:
+        logger.warning(f"⚠️ Интересы {user_id}: fallback 'general' ({e})")
+        return 'general'
+
+def normalize_interest(raw_list: list) -> str:
+    if not raw_list:
+        return 'general'
+
+    clean = []
+    for i in raw_list:
+        cleaned = i.strip().lower()
+        cleaned = ''.join(c for c in cleaned if c.isalnum() or c.isspace())
+        cleaned = ' '.join(cleaned.split())[:20]
+        if cleaned:
+            clean.append(cleaned)
+
+    normalized = '+'.join(clean[:4])  # ✅ 4 ИНТЕРЕСА
+
+    if len(normalized) > 90:
+        normalized = '+'.join(clean[:3])
+
+    return normalized or 'general'
+
+def get_interest_key(day: str, interest_hash: str, pack_num: int) -> str:
+    """'2026-02-20_tech_4'"""
+
+    return f"{day}_{interest_hash}_{pack_num}"
 
 
 """Функции управления уровнями"""
@@ -150,13 +201,10 @@ def reset_daily_progress():
 
     yesterday = date.today() - timedelta(days=1)
     yesterday_str = yesterday.strftime('%Y-%m-%d')
-
-    # Сбрасываем ТОЛЬКО вчерашние записи
-    UsersNewsProgress.update(last_pack=0, daily_level=0).where(
+    count = UsersNewsProgress.update(last_pack=0, daily_level=0).where(
         UsersNewsProgress.day == yesterday_str
     ).execute()
-
-    print(f"✅ Сброшены вчерашние записи последних пачек и дневного левела пользователей: {yesterday_str}")
+    logger.info(f"🔄 Сброс {yesterday_str}: {count} записей")
 
 def calculate_daily_level(packs_today: int) -> tuple:
     """Уровень за день по пачкам"""
@@ -185,18 +233,18 @@ def update_streak(user_id: int) -> bool:
     if not user_progress:
         return False
 
-    last_active = user_progress.last_active_date.date() if user_progress.last_active_date else None
+    last_active_date = user_progress.last_active_date
+    last_active = last_active_date.date() if last_active_date else None
 
     # Проверяем пропуск дня
     if last_active and last_active < (today_date - timedelta(days=1)):
         user_progress.streak_current = 0
-        print(f"Серия сброшена у {user_id}")
+        logger.warning(f"Серия сброшена у {user_id}")
 
     # Сегодня активен → +1 к серии (если не был)
     if last_active != today_date:
         user_progress.streak_current += 1
         user_progress.streak_max = max(user_progress.streak_max, user_progress.streak_current)
-        print(f"Серия {user_id}: {user_progress.streak_current}")
 
     user_progress.last_active_date = datetime.now()
     user_progress.updated_at = datetime.now()
@@ -206,6 +254,7 @@ def update_streak(user_id: int) -> bool:
 
 def get_user_level(packs_viewed: int) -> tuple:
     """Возвращает (уровень, название, сообщение)"""
+
     if packs_viewed < 3:
         return 1, "🌱 Новичок", "Первый дайджест! Добро пожаловать! 🌅"
     elif packs_viewed < 6:

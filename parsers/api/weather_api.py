@@ -9,28 +9,22 @@ import logging
 
 load_dotenv()
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
-verified_city = []
 logger = logging.getLogger(__name__)
 
+from functools import lru_cache
 
+@lru_cache(maxsize=128)
 def validate_city(city: str) -> bool:
     """Проверка города на наличие в openweatherapi"""
 
-    if city in verified_city:
-        return True
-    else:
-        weather = get_daily_forecast(city)
-        if weather:
-            verified_city.append(city)
-            return True
-        return False
+    return bool(get_daily_forecast(city))
 
 
 def get_daily_forecast(city: str = 'Минск') -> Dict:
     """Запрос к openweatherapi, получение информации о погоде и её парсинг (работа с информаций)"""
 
     if not OPENWEATHER_API_KEY:
-        print('Ключ api погоды - не найден')
+        logger.error('❌ OPENWEATHER_API_KEY не найден в .env')
         return {}
 
     try:
@@ -54,5 +48,5 @@ def get_daily_forecast(city: str = 'Минск') -> Dict:
 
         return weather_info
     except Exception as e:
-        print(f'❌ Ошибка при парсинге погоды (openweatherapi): {e}')
+        logger.error(f'❌ OpenWeatherAPI ({city}): {e}')
         return {}
