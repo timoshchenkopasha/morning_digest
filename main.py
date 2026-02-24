@@ -5,6 +5,7 @@ import logging
 from config import bot
 from database.db import *
 import handlers
+from utils.sheduler import *
 from utils import *
 from parsers import *
 
