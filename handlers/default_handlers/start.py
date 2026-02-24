@@ -16,7 +16,7 @@ def start_handler(message):
 
     bot.send_message(
         message.chat.id,
-        """🌅 <b>🚀 WELCOME TO Утренний Дайджест! ⚔️</b>
+        """🌅 <b>🚀 WELCOME TO Утренний Дайджест!</b>
 
     💥 <b>ЭТО ТВОЙ НОВЫЙ УТРЕННИЙ РИТУАЛ:</b>
     ☕ <b>КОФЕ + НОВОСТИ + ПОГОДА = ПРОДУКТИВНЫЙ ДЕНЬ</b>
@@ -87,7 +87,7 @@ def handle_manual_city(message):
         if set_user_city(user_id, user_name, city):
             bot.send_message(
                 message.from_user.id,
-                f"""🎉 <b>🏆 {city.upper()} - ГОРОД ПРИНЯТ! ⚔️</b>
+                f"""🎉 <b>🏆 {city.upper()} - ГОРОД ПРИНЯТ! </b>
 
             ✅ <b>ГОРОД: {city}</b> ☀️ <i>Погода готова!</i>
 

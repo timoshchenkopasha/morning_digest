@@ -33,7 +33,7 @@ def digest_handler(message: types.Message) -> None:
         set_user_progress(user_id, user_name, 0)
         bot.send_message(
             message.chat.id,
-            f"""<b>🚀 MorningDigest — ТВОË НАЧАЛО ДНЯ! ⚡</b>
+            f"""<b>🚀 MorningDigest — ТВОË НАЧАЛО ДНЯ! </b>
 
 <b>Введи - /start</b>
 <i>💥 Новости обещают быть интересными! 🌅</i>""",
