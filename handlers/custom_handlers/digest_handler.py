@@ -60,7 +60,7 @@ def digest_handler(message: types.Message) -> None:
         logger.info(f"✅ Пачка {next_pack} из БД: {len(news_pack) if news_pack else 0} новостей")
     else:
         logger.info("🌐 Качаем свежие новости...")
-        news_pack = news_api_interests(user_interest, 5)
+        news_pack = news_api_interests(user_interest, 5, is_morning=False)
         if news_pack:
             save_news_pack(today, user_interest, next_pack, news_pack)
             logger.info(f"💾 Сохранена пачка {next_pack}: {len(news_pack)} новостей")
@@ -95,24 +95,30 @@ def digest_handler(message: types.Message) -> None:
             user_id,
             """🎉 <b>ПАЧКА ЗАГРУЖЕНА! 📦 +1 К ПРОГРЕССУ!</b>
 
-        <b>🏆 ТВОЙ СТАТУС:</b>
-        📊 <code>/profile</code> — проверь уровни + серию
-        🔥 <b>Собери 3 пачки → Профи дня!</b>
-
         <b>➕ ЧТО ДАЛЬШЕ?</b>
-        • <code>/digest</code> → <b>ещё 5 новостей</b>
+        /digest → <b>ещё 5 новостей</b>
         <i>💥 Стань Профи дня! 🚀</i>""",
             parse_mode='HTML'
         )
 
-        # Обновляем прогресс
+        # 1. Обновляем прогресс
         user_progress.last_pack = next_pack
         user_progress.updated_at = datetime.now()
+        user_progress.save()
+        logger.info(f"📦 Пачка сохранена: {user_progress.last_pack}")
+
+        # 2. Обновляем СЕРИЮ
         streak_grew = update_streak(user_id)
         logger.info(f"🔥 streak_grew: {streak_grew}")
 
-        logger.info(f"💾 Прогресс: пачка {user_progress.last_pack}, стрик {user_progress.streak_current}")
-        user_progress.save()
+        # 3. ЧИТАЕМ АКТУАЛЬНЫЕ ДАННЫЕ!
+        user_progress = (UsersNewsProgress
+                         .select()
+                         .join(Users)
+                         .where((Users.user_id == user_id) & (UsersNewsProgress.day == today))
+                         .first())
+
+        logger.info(f"💾 Финал: пачка={user_progress.last_pack}, серия={user_progress.streak_current}")
 
         # Проверка уровня
         new_level, level_name = calculate_daily_level(user_progress.last_pack)

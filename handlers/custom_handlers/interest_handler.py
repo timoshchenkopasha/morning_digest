@@ -79,10 +79,13 @@ def interests_handler(message: types.Message):
 
 <b>Как это работает:</b>
 • Выбери <b>2-4</b> темы (максимум)
-• <code>/digest</code> будет показывать новости <b>ТОЛЬКО</b> по твоим темам
-• Утро = общие новости (всегда)
+• /digest будет показывать новости <b>ТОЛЬКО</b> по твоим темам
+• <b>УТРОМ</b> - рассылка новостей из <b>ТВОЕЙ СТРАНЫ</b> (всегда)
 
-<i>👇 Выбирай кнопками снизу 👇</i>""",
+3️⃣ <b>/time</b> → выбери время рассылки (5:00-10:00) ⏰
+4️⃣ <b>/digest</b> → <b>персональные новости по интересам!</b> 🔥🔥
+
+<i>👇 Выбирай кнопками снизу и нажми <b>СОХРАНИТЬ</b>👇</i>""",
         parse_mode='HTML',
         reply_markup=keyboard
     )
@@ -120,8 +123,10 @@ def handle_interest_selection(call):
         bot.edit_message_text(
             f"🎉 <b>✅ ИНТЕРЕСЫ СОХРАНЕНЫ!</b>\n\n"
             f"📋 <b>Твои темы:</b> {', '.join([AVAILABLE_INTERESTS[i] for i in current_selection])}\n\n"
-            f"🔥 <b>Теперь /digest</b> = новости <b>ТОЛЬКО ПО ТЕМ ТЕБЕ!</b>\n"
-            f"📦 Утро = общие новости (как раньше)",
+            f"🔥 <b>Теперь /digest</b> = новости <b>только по ТВОИМ ИНТЕРЕСЕМ!</b>\n"
+            f"📦 Утро = общие новости из <b>ТВОЕЙ СТРАНЫ</b>\n"
+            f"3️⃣ <b>/time</b> → выбери время рассылки (5:00-10:00) ⏰\n"
+            f"4️⃣ <b>/digest</b> → <b>персональные новости по интересам!</b> 🔥",
             call.message.chat.id,
             call.message.message_id,
             parse_mode='HTML'
@@ -155,23 +160,23 @@ def save_user_interests(user_id: int, interests: list):
         user = Users.get(Users.user_id == user_id)
         today = datetime.now().strftime('%Y-%m-%d')
 
-        # Создаём/обновляем прогресс с интересами
-        progress, created = UsersNewsProgress.get_or_create(
-            user=user,
-            day=today,
-            defaults={'last_pack': 0}
-        )
+        # СОХРАНЯЕМ В ПРАВИЛЬНОЕ МЕСТО!
+        user.interests = '+'.join(interests) if interests else 'general'  # ← Users.interests!
+        user.save()
 
-        # Сохраняем интересы как строку "tech+sport+ai"
-        progress.interest = '+'.join(interests) if interests else ''
+        # Опционально: прогресс тоже
+        progress, created = UsersNewsProgress.get_or_create(
+            user=user, day=today, defaults={'last_pack': 0}
+        )
         progress.updated_at = datetime.now()
         progress.save()
 
-        user_interests.pop(user_id, None)  # Очищаем временное хранилище
-        logger.info(f"✅ Интересы {user_id}: {interests}")
+        user_interests.pop(user_id, None)
+        logger.info(f"✅ Интересы {user_id}: {interests} → '{user.interests}'")
 
     except Exception as e:
         logger.error(f"❌ Интересы {user_id}: {e}")
+
 
 
 

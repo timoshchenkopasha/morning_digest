@@ -23,16 +23,13 @@ class BaseModel(Model):
         database = db
 
 
+# database/db.py
 class Users(BaseModel):
-    """Таблица пользователей в бд"""
-
-    id = IntegerField(primary_key=True)
     user_id = IntegerField(unique=True)
-    user_name = CharField(max_length=100, null=True)
-    city = CharField(max_length=100, null=True)
-    timezone = CharField(null=True, default='UTC+3')
-    created_at = DateTimeField(default=datetime.now)
-
+    user_name = CharField(null=True)
+    city = CharField(default='Минск')
+    interests = CharField(default='general')
+    daily_send_hour = IntegerField(default=7)
 
 class UsersNewsProgress(BaseModel):
     """Таблица прогресса просмотра новостей пользователя"""
@@ -217,40 +214,49 @@ def calculate_daily_level(packs_today: int) -> tuple:
         return 1, "🌱 Читатель"
     return 0, "😴 Спит"
 
+
 def update_streak(user_id: int) -> bool:
-    """Возвращает True если серия растет"""
+    """Возвращает True если серия растет ТОЛЬКО при новой активности"""
+    today_str = date.today().strftime('%Y-%m-%d')
 
-    today_date = date.today()
-    today_str = today_date.strftime('%Y-%m-%d')
+    progress = (UsersNewsProgress
+                .select()
+                .join(Users)
+                .where((Users.user_id == user_id) & (UsersNewsProgress.day == today_str))
+                .first())
 
-    user_progress = (UsersNewsProgress
-                     .select()
-                     .join(Users)
-                     .where((Users.user_id == user_id) & (UsersNewsProgress.day == today_str))
-                     .order_by(UsersNewsProgress.updated_at.desc())
-                     .first()
-                     )
-    if not user_progress:
+    if not progress:
+        logger.error(f"❌ Нет записи прогресса для {user_id}")
         return False
 
-    last_active_date = user_progress.last_active_date
-    last_active = last_active_date.date() if last_active_date else None
+    # ПРОВЕРКА: активен ли СЕГОДНЯ?
+    was_active_today = progress.last_active_date and progress.last_active_date.date() == date.today()
 
-    # Проверяем пропуск дня
-    if last_active and last_active < (today_date - timedelta(days=1)):
-        user_progress.streak_current = 0
-        logger.warning(f"Серия сброшена у {user_id}")
+    logger.info(f"🔍 update_streak: {progress.streak_current} → ? (active_today={was_active_today})")
 
-    # Сегодня активен → +1 к серии (если не был)
-    if last_active != today_date:
-        user_progress.streak_current += 1
-        user_progress.streak_max = max(user_progress.streak_max, user_progress.streak_current)
+    if was_active_today:
+        logger.info(f"✅ Уже активен сегодня {user_id}, серия не меняется")
+        return False  # НЕ растет!
 
-    user_progress.last_active_date = datetime.now()
-    user_progress.updated_at = datetime.now()
-    user_progress.save()
+    # НОВАЯ АКТИВНОСТЬ — считаем серию
+    if progress.last_active_date:
+        last_date = progress.last_active_date.date()
+        yesterday = date.today() - timedelta(days=1)
 
+        if last_date < yesterday:
+            progress.streak_current = 1  # Сброс
+        else:
+            progress.streak_current += 1  # Продолжаем
+    else:
+        progress.streak_current = 1  # Первая
+
+    progress.streak_max = max(progress.streak_max, progress.streak_current)
+    progress.last_active_date = datetime.now()
+    progress.save()
+
+    logger.info(f"✅ НОВАЯ серия {user_id}: {progress.streak_current}/{progress.streak_max}")
     return True
+
 
 def get_user_level(packs_viewed: int) -> tuple:
     """Возвращает (уровень, название, сообщение)"""
@@ -265,6 +271,7 @@ def get_user_level(packs_viewed: int) -> tuple:
         return 4, "🌲 Лес", "9 пачек! Ты в теме! 🔥"
     else:
         return 5, "🌍 MorningMaster", "12+ пачек! Мастер утра! 🏆"
+
 
 def init_db():
     db.connect()

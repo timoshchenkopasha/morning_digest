@@ -81,7 +81,9 @@ def send_daily_digest_and_weather():
             news_pack = get_news_pack(today, interest_hash, 1)
         else:
             logger.info(f"🌐 {country}: API запрос...")
-            news_pack = news_api_interests('general', 5, country)
+            # 07:00 — общие новости ТОЛЬКО страны
+            news_pack = news_api_interests('general', 5, country, is_morning=True)
+
             if news_pack:
                 save_news_pack(today, interest_hash, 1, news_pack)
                 logger.info(f"💾 {country}: пачка сохранена в КЭШ")
@@ -144,3 +146,49 @@ def send_daily_digest_and_weather():
         executor.map(send_to_user, subscribers)
 
     logger.info("✅ Утренняя рассылка завершена!")
+
+
+# В send_digest.py ДОБАВЬ в КОНЕЦ:
+
+def send_individual_digest(user_id: int):
+    """📱 Индивидуальная рассылка для 1 пользователя"""
+    logger.info(f"🔔 Индивидуальная рассылка для {user_id}")
+
+    try:
+        user = Users.get(Users.user_id == user_id)
+        user_city = user.city
+        user_name = user.user_name or 'User'
+        country = get_country_by_city(user_city)
+
+        # ✅ Новости по интересам пользователя (не общие!)
+        user_interest = get_user_interests(user_id)
+        news_pack = news_api_interests(user_interest, 5, is_morning=True)  # Страна + интересы
+
+        # Погода
+        weather_info = get_daily_forecast(user_city)
+        if weather_info:
+            bot.send_message(user_id, format_weather_message(weather_info), parse_mode='HTML')
+
+        # Новости
+        bot.send_message(user_id,
+                         f"⏰ <b>{user.daily_send_hour}:00 — ТВОЯ РАССЫЛКА!</b>\n📰 <b>По интересам: {user_interest}</b>",
+                         parse_mode='HTML')
+
+        for i, news in enumerate(news_pack, 1):
+            title = news['title'][:100]
+            caption = f'{i}. <b>{title}</b>\n\n🔗 {news["url"]}'
+            if news.get('image_url'):
+                try:
+                    bot.send_photo(user_id, news['image_url'], caption=caption, parse_mode='HTML')
+                except:
+                    bot.send_message(user_id, caption, parse_mode='HTML')
+            else:
+                bot.send_message(user_id, caption, parse_mode='HTML')
+
+        # Прогресс
+        set_user_progress(user_id, user_name, 1)
+        bot.send_message(user_id, "🎉 <b>ПЕРВАЯ ПАЧКА ЗАГРУЖЕНА!</b>\n📦 <b>/digest</b> → ещё новости!",
+                         parse_mode='HTML')
+
+    except Exception as e:
+        logger.error(f"❌ Индивидуальная рассылка {user_id}: {e}")

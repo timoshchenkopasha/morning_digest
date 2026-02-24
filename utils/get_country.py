@@ -18,6 +18,6 @@ def get_country_by_city(city: str) -> str:
         'киев': 'ua', 'харьков': 'ua', 'одесса': 'ua', 'днепр': 'ua', 'львов': 'ua'
     }
 
-    result = popular_cities.get(city_lower, 'ru')
+    result = popular_cities.get(city_lower, 'by')
     _city_country_cache[city] = result
     return result
