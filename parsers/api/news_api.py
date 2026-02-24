@@ -6,13 +6,13 @@ from dotenv import load_dotenv
 import logging
 
 load_dotenv()
-NEWS_API_KEY = os.getenv('NEWS_API_KEY')  # ✅ ИСПРАВЛЕНО: из .env!
+NEWS_API_KEY = os.getenv('NEWS_API_KEY')
 logger = logging.getLogger(__name__)
 
 
 def news_api(top_n: int = 5, country: str = 'ru') -> List[Dict]:
     """Общие новости (fallback) — https://newsdata.io"""
-    return news_api_interests('general', top_n, country)  # ✅ Использует новую функцию
+    return news_api_interests('general', top_n, country)
 
 
 def news_api_interests(interest_str: str = 'general', top_n: int = 5, country: str = 'ru') -> List[Dict]:
@@ -26,7 +26,7 @@ def news_api_interests(interest_str: str = 'general', top_n: int = 5, country: s
         url = 'https://newsdata.io/api/1/latest'
         params = {
             'apikey': NEWS_API_KEY,
-            'q': interest_str if interest_str != 'general' else '',  # ✅ КЛЮЧЕВОЙ ПАРАМЕТР!
+            'q': interest_str if interest_str != 'general' else '',
             'country': country,
             'language': 'ru',
             'size': top_n,

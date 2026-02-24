@@ -91,6 +91,20 @@ def digest_handler(message: types.Message) -> None:
                 logger.error(f"❌ Ошибка отправки {i}: {e}")
                 bot.send_message(user_id, caption, parse_mode='HTML')
 
+        bot.send_message(
+            user_id,
+            """🎉 <b>ПАЧКА ЗАГРУЖЕНА! 📦 +1 К ПРОГРЕССУ!</b>
+
+        <b>🏆 ТВОЙ СТАТУС:</b>
+        📊 <code>/profile</code> — проверь уровни + серию
+        🔥 <b>Собери 3 пачки → Профи дня!</b>
+
+        <b>➕ ЧТО ДАЛЬШЕ?</b>
+        • <code>/digest</code> → <b>ещё 5 новостей</b>
+        <i>💥 Стань Профи дня! 🚀</i>""",
+            parse_mode='HTML'
+        )
+
         # Обновляем прогресс
         user_progress.last_pack = next_pack
         user_progress.updated_at = datetime.now()
@@ -99,8 +113,6 @@ def digest_handler(message: types.Message) -> None:
 
         logger.info(f"💾 Прогресс: пачка {user_progress.last_pack}, стрик {user_progress.streak_current}")
         user_progress.save()
-
-        bot.send_message(user_id, "<b>/digest</b> → следующая пачка новостей!", parse_mode='HTML')
 
         # Проверка уровня
         new_level, level_name = calculate_daily_level(user_progress.last_pack)

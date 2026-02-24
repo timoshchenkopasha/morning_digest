@@ -30,16 +30,16 @@ def profile_handler(message: Message) -> None:
     user = user_progress.user
     daily_level_num, daily_level_name = calculate_daily_level(user_progress.last_pack)
 
-    profile_text = f"""🏆 <b>⚔️ ТВОЙ ПРОФИЛЬ: {user.user_name or 'ВОИН'}</b> 🏅
+    profile_text = f"""🏆 <b>⚔️ ТВОЙ ПРОФИЛЬ: {user.user_name}</b> 🏅
 
-📊 <b>🎯 СТАТИСТИКА ДНЯ:</b>
-📦 Пачек сегодня: <b>{user_progress.last_pack}</b>
-⭐ Уровень: <b>{daily_level_num}</b> <i>{daily_level_name}</i>
+    📊 <b>🎯 СТАТИСТИКА ДНЯ:</b>
+    📦 Пачек: <b>{user_progress.last_pack}</b> 
+    ⭐ Уровень: <b>{daily_level_num}</b> <i>{daily_level_name}</i>
 
-🔥 <b>🏅 ТВОЯ СЕРИЯ:</b>
-📅 Текущая: <b>{user_progress.streak_current}</b> дней
-🏆 Рекорд: <b>{user_progress.streak_max}</b> дней
+    🔥 <b>🏅 ТВОЯ СЕРИЯ:</b>
+    📅 Текущая: <b>{user_progress.streak_current}</b> дней
+    🏆 Рекорд: <b>{user_progress.streak_max}</b> дней
 
-🌍 <b>ТВОЙ ГОРОД:</b> <code>{user.city or '🚀 НЕ ВЫБРАН'}</code>"""
+    🌍 Город: <code>{user.city}</code>"""
 
     bot.send_message(message.chat.id, profile_text, parse_mode='HTML')
