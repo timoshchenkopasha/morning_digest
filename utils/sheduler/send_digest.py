@@ -5,7 +5,7 @@ from database.db import *
 from parsers.api.news_api import *
 from parsers.api.weather_api import get_daily_forecast
 from config import bot
-from utils import get_country_by_city
+from utils.get_country import get_country_by_city
 
 logger = logging.getLogger(__name__)
 
