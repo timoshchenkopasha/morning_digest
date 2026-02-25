@@ -60,7 +60,7 @@ def handle_city_selection(call):
     if set_user_city(user_id, user_name, call.data):
         bot.send_message(
             call.from_user.id,
-            f"""🎉 <b>🏆 {call.data.upper()} - ГОРОД ПРИНЯТ! ⚔️</b>
+            f"""🎉 <b>🏆 {call.data.upper()} - ГОРОД ПРИНЯТ!️</b>
 
 ✅ <b>ГОРОД: {call.data}</b> ☀️ <i>Погода готова!</i>
 
@@ -114,7 +114,7 @@ def handle_manual_city(message):
 🔄 <b>Попробуй:</b>
 • Правильное написание
 • Минск, Москва, Киев
-• <code>/start</code> — популярные города""",
+• /start — популярные города""",
             parse_mode='HTML'
         )
         bot.register_next_step_handler(message, handle_manual_city)

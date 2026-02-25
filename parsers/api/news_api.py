@@ -15,7 +15,7 @@ def news_api(top_n: int = 5, country: str = 'ru') -> List[Dict]:
     return news_api_interests('general', top_n, country)
 
 
-def news_api_interests(interest_str: str = 'general', top_n: int = 5, country: str = None, is_morning: bool = False) -> \
+def news_api_interests(interest_str: str = 'general', top_n: int = 7, country: str = None, is_morning: bool = False) -> \
 List[Dict]:
     """📰 Логика: /digest=все страны | 07:00=только страна"""
 
@@ -38,7 +38,7 @@ List[Dict]:
         # ✅ НОВЫЕ ПРАВИЛА:
         if is_morning:  # 07:00 рассылка
             params['country'] = country  # ТОЛЬКО страна!
-            params['category'] = 'general,politics,business'  # Общие новости
+            params['category'] = 'politics,business'  # Общие новости
             logger.info("🌅 УТРЕННИЙ РЕЖИМ: только страна + общие категории")
         else:  # /digest днём
             if interest_str == 'general':

@@ -134,7 +134,7 @@ def set_user_city(user_id: int, user_name, city_name: str):
             defaults={         # Только для создания!
                 'user_name': user_name,
                 'city': city_name,
-                'timezone': 'UTC+3',
+                # 'timezone': 'UTC+3',
                 'created_at': datetime.now()
             }
         )

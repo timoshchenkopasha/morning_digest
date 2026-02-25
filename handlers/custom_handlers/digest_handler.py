@@ -60,7 +60,7 @@ def digest_handler(message: types.Message) -> None:
         logger.info(f"✅ Пачка {next_pack} из БД: {len(news_pack) if news_pack else 0} новостей")
     else:
         logger.info("🌐 Качаем свежие новости...")
-        news_pack = news_api_interests(user_interest, 5, is_morning=False)
+        news_pack = news_api_interests(user_interest, 7, is_morning=False)
         if news_pack:
             save_news_pack(today, user_interest, next_pack, news_pack)
             logger.info(f"💾 Сохранена пачка {next_pack}: {len(news_pack)} новостей")
@@ -96,7 +96,7 @@ def digest_handler(message: types.Message) -> None:
             """🎉 <b>+1 К ПРОГРЕССУ!</b>
 
         <b>➕ ЧТО ДАЛЬШЕ?</b>
-        /digest → <b>ещё 5 новостей</b>
+        /digest → <b>ещё 7 новостей</b>
         <i>💥 Стань Профи дня! 🚀</i>""",
             parse_mode='HTML'
         )

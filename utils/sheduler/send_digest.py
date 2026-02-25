@@ -49,7 +49,7 @@ def format_weather_message(forecast: Dict) -> str:
 def send_daily_digest_and_weather():
     """КЭШ ПО СТРАНАМ! 1 API = 100 пользователей!"""
 
-    logger.info("🔔 07:00 — утренняя рассылка новостей!")
+    logger.info("🔔 утренняя рассылка новостей!")
     today = datetime.now().strftime('%Y-%m-%d')
 
     subscribers = get_subscribers()
@@ -82,7 +82,7 @@ def send_daily_digest_and_weather():
         else:
             logger.info(f"🌐 {country}: API запрос...")
             # 07:00 — общие новости ТОЛЬКО страны
-            news_pack = news_api_interests('general', 5, country, is_morning=True)
+            news_pack = news_api_interests('general', 10, country, is_morning=True)
 
             if news_pack:
                 save_news_pack(today, interest_hash, 1, news_pack)
@@ -131,8 +131,8 @@ def send_daily_digest_and_weather():
             # Прогресс
             set_user_progress(user_id, user_name, 1)
             bot.send_message(user_id,
-                             "🎉 <b>ПЕРВАЯ ПАЧКА ЗАГРУЖЕНА!</b>\n"
-                             f"📦 <b>/digest</b> → <b>ТВОИ ИНТЕРЕСЫ</b>!\n"
+                             "🎉 <b>ЭТО БЫЛИ УТРЕННИЕ НОВОСТИ</b>\n"
+                             f"📦 <b>/digest</b> → <b>НОВОСТИ ПО ТВОИМ ИНТЕРЕСАМ</b>!\n"
                              "📊 <b>/profile</b> → твой прогресс!",
                              parse_mode='HTML')
 
