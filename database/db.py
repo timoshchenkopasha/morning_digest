@@ -148,20 +148,29 @@ def set_user_city(user_id: int, user_name, city_name: str):
     except Exception as error:
         logger.error(f"❌ Город {user_id}: {error}")
 
+# def get_user_interests(user_id: int) -> str:
+#     """Возвращает строку интересов или 'general'"""
+#
+#     try:
+#         today = datetime.now().strftime('%Y-%m-%d')
+#         user = (Users
+#                     .select()
+#                     .join(UsersNewsProgress)
+#                     .where((Users.user_id == user_id) & (UsersNewsProgress.day == today))
+#                     .first())
+#
+#         if user and user.interests:
+#             return user.interests
+#         return 'general'
+#     except Exception as e:
+#         logger.warning(f"⚠️ Интересы {user_id}: fallback 'general' ({e})")
+#         return 'general'
+
 def get_user_interests(user_id: int) -> str:
-    """Возвращает строку интересов или 'general'"""
-
+    """Возвращает строку интересов из Users или 'general'"""
     try:
-        today = datetime.now().strftime('%Y-%m-%d')
-        progress = (UsersNewsProgress
-                    .select()
-                    .join(Users)
-                    .where((Users.user_id == user_id) & (UsersNewsProgress.day == today))
-                    .first())
-
-        if progress and progress.interest:
-            return progress.interest
-        return 'general'
+        user = Users.get_or_none(Users.user_id == user_id)
+        return user.interests if user and user.interests else 'general'
     except Exception as e:
         logger.warning(f"⚠️ Интересы {user_id}: fallback 'general' ({e})")
         return 'general'

@@ -104,15 +104,8 @@ def send_daily_digest_and_weather():
             return
 
         try:
-            # Погода (персональная)
-            weather_info = get_daily_forecast(user_city)
-            if weather_info:
-                bot.send_message(user_id, format_weather_message(weather_info), parse_mode='HTML')
-            else:
-                bot.send_message(user_id, "🌤️ <b>ПОГОДА НЕ ВАЖНА</b>\n☀️ Хорошего дня ❤️", parse_mode='HTML')
-
             # Новости ИЗ КЭША
-            bot.send_message(user_id, "<b>УТРЕННЯЯ РАССЫЛКА НОВОСТЕЙ!</b>\n🔥 <b>ПЕРВАЯ ПАЧКА ДЛЯ ТВОЕЙ СТРАНЫ</b>",
+            bot.send_message(user_id, "<b>УТРЕННЯЯ РАССЫЛКА НОВОСТЕЙ СТРАНЫ!</b>\n🔥 <b>АКТУАЛЬНЫЕ НОВОСТИ ТВОЕЙ СТРАНЫ</b>",
                              parse_mode='HTML')
 
             for i, news in enumerate(news_pack, 1):
@@ -131,7 +124,7 @@ def send_daily_digest_and_weather():
             # Прогресс
             set_user_progress(user_id, user_name, 1)
             bot.send_message(user_id,
-                             "🎉 <b>ЭТО БЫЛИ УТРЕННИЕ НОВОСТИ</b>\n"
+                             "🎉 <b>ЭТО БЫЛИ УТРЕННИЕ НОВОСТИ СТРАНЫ</b>\n"
                              f"📦 <b>/digest</b> → <b>НОВОСТИ ПО ТВОИМ ИНТЕРЕСАМ</b>!\n"
                              "📊 <b>/profile</b> → твой прогресс!",
                              parse_mode='HTML')
@@ -152,6 +145,7 @@ def send_daily_digest_and_weather():
 
 def send_individual_digest(user_id: int):
     """📱 Индивидуальная рассылка для 1 пользователя"""
+
     logger.info(f"🔔 Индивидуальная рассылка для {user_id}")
 
     try:
@@ -161,17 +155,19 @@ def send_individual_digest(user_id: int):
         country = get_country_by_city(user_city)
 
         # ✅ Новости по интересам пользователя (не общие!)
-        user_interest = get_user_interests(user_id)
-        news_pack = news_api_interests(user_interest, 5, is_morning=True)  # Страна + интересы
+        user_interests = get_user_interests(user_id)
+        news_pack = news_api_interests(user_interests, 7, is_morning=True)  # Страна + интересы
 
-        # Погода
+        # Погода (персональная)
         weather_info = get_daily_forecast(user_city)
         if weather_info:
             bot.send_message(user_id, format_weather_message(weather_info), parse_mode='HTML')
+        else:
+            bot.send_message(user_id, "🌤️ <b>ПОГОДА НЕ ВАЖНА</b>\n☀️ Хорошего дня ❤️", parse_mode='HTML')
 
         # Новости
         bot.send_message(user_id,
-                         f"⏰ <b>{user.daily_send_hour}:00 — ТВОЯ РАССЫЛКА!</b>\n📰 <b>По интересам: {user_interest}</b>",
+                         f"⏰ <b>{user.daily_send_hour}:00 — ТВОЯ РАССЫЛКА!</b>\n📰 <b>По интересам: {user_interests}</b>",
                          parse_mode='HTML')
 
         for i, news in enumerate(news_pack, 1):
@@ -187,7 +183,7 @@ def send_individual_digest(user_id: int):
 
         # Прогресс
         set_user_progress(user_id, user_name, 1)
-        bot.send_message(user_id, "🎉 <b>ПЕРВАЯ ПАЧКА ЗАГРУЖЕНА!</b>\n📦 <b>/digest</b> → ещё новости!",
+        bot.send_message(user_id, "🎉 <b>ЭТО БЫЛИ ТОП-НОВОСТИ ПО ТВОИМ ИНТЕРЕСАМ!</b>\n📦 <b>/digest</b> → ещё новости!",
                          parse_mode='HTML')
 
     except Exception as e:

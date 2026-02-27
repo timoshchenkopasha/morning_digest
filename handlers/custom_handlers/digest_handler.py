@@ -51,18 +51,18 @@ def digest_handler(message: types.Message) -> None:
     recent_users.add(user_id)
     logger.info(f"✅ /digest разрешен для {user_id}")
 
-    user_interest = get_user_interests(user_id)
+    user_interests = get_user_interests(user_id)
     next_pack = user_progress.last_pack + 1
     logger.info(f"📦 Пачка {next_pack} для {user_id}")
 
-    if pack_exists(today, user_interest, next_pack):
-        news_pack = get_news_pack(today, user_interest, next_pack)
+    if pack_exists(today, user_interests, next_pack):
+        news_pack = get_news_pack(today, user_interests, next_pack)
         logger.info(f"✅ Пачка {next_pack} из БД: {len(news_pack) if news_pack else 0} новостей")
     else:
         logger.info("🌐 Качаем свежие новости...")
-        news_pack = news_api_interests(user_interest, 7, is_morning=False)
+        news_pack = news_api_interests(user_interests, 7, is_morning=False)
         if news_pack:
-            save_news_pack(today, user_interest, next_pack, news_pack)
+            save_news_pack(today, user_interests, next_pack, news_pack)
             logger.info(f"💾 Сохранена пачка {next_pack}: {len(news_pack)} новостей")
         else:
             logger.error("❌ news_api вернул пусто")
